@@ -1,0 +1,24 @@
+{
+  "name": "blog-post",
+  "version": "1.0.0",
+  "description": "A server side API with the four basic functions of persistent storage (CRUD) made for the web development course as part of lab 7.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SerLizar/blog-post.git"
+  },
+  "author": "Sergio López Madriz (SerLizar)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SerLizar/blog-post/issues"
+  },
+  "homepage": "https://github.com/SerLizar/blog-post#readme",
+  "dependencies": {
+    "express": "^4.16.4",
+    "uuid": "^3.3.2"
+  }
+}
