@@ -4,22 +4,21 @@ const router = express.Router();
 const {BlogPosts} = require('./blog-post-model');
 
 router.get('/blog-posts', (req, res, next) => {
-	
-	let allBlogPosts = BlogPosts.get();
-
-	if (allBlogPosts) {
-		res.status(200).json({
-			message: "Successfully sent the list of blog posts",
-			status: 200,
-			posts: allBlogPosts
+	BlogPosts.get({})
+		.then(allBlogPosts => {
+			res.status(200).json({
+				message: "Successfully sent the list of blog posts",
+				status: 200,
+				posts: allBlogPosts
+			});
+		})
+		.catch(err => {
+			res.status(500).json({
+				message: "Unable to sent the list of blog posts, something seems to be wrong with the server",
+				status: 500
+			});
+			return next();
 		});
-	} else {
-		res.status(500).json({
-			message: "Unable to sent the list of blog posts, something seems to be wrong with the server",
-			status: 500
-		});
-	}
-	return next();
 });
 
 router.get('/blog-posts/:author', (req, res, next) => {
@@ -33,36 +32,31 @@ router.get('/blog-posts/:author', (req, res, next) => {
 		return next();
 	}
 
-	let allBlogPosts = BlogPosts.get();
-	if (!allBlogPosts) {
-		res.status(500).json({
-			message: "Unable to sent the list of blog posts, something seems to be wrong with the server",
-			status: 500
+	const searchTerm = {author: author};
+
+	BlogPosts.get(searchTerm)
+		.then(posts => {
+			if (posts.length) {
+				res.status(200).json({
+					message: `Successfully sent the list of blog posts for ${author}.`,
+					status: 200,
+					posts: posts
+				});
+			} else {
+				res.status(404).json({
+					message: `The author: ${author}, eighter has no posts or does not exist.`,
+					status: 404
+				});
+				return next();
+			}
+		})
+		.catch(err => {
+			res.status(500).json({
+				message: "Unable to sent the list of blog posts, something seems to be wrong with the server",
+				status: 500
+			});
+			return next()
 		});
-		return next();
-	}
-	let authorPosts = [];
-
-	allBlogPosts.forEach(post => {
-		if (post.author == author) {
-			authorPosts.push(post);
-		}
-	});
-
-	if (authorPosts.length) {
-		res.status(200).json({
-			message: `Successfully sent the list of blog posts for ${author}.`,
-			status: 200,
-			posts: authorPosts
-		});
-		return next();
-	}
-
-	res.status(404).json({
-		message: `The author: ${author}, eighter has no posts or does not exist.`,
-		status: 404
-	});
-	return next();
 });
 
 router.post('/blog-posts', (req, res, next) => {
@@ -83,20 +77,21 @@ router.post('/blog-posts', (req, res, next) => {
 		}
 	};
 
-	let post = BlogPosts.post(title, content, author, publishDate);
-	if (post) {
-		res.status(201).json({
-			message: "Successfully created new post.",
-			status: 201,
-			post: post
+	BlogPosts.post(title, content, author, publishDate)
+		.then(post => {
+			res.status(201).json({
+				message: "Successfully created new post.",
+				status: 201,
+				post: post
+			});
+		})
+		.catch(err => {
+			res.status(500).json({
+				message: "Unable to create the new blog post, something seems to be wrong with the server",
+				status: 500
+			});
+			return next();
 		});
-	} else {
-		res.status(500).json({
-			message: "Unable to create the new blog post, something seems to be wrong with the server",
-			status: 500
-		});
-	}
-	return next();
 });
 
 router.delete('/blog-posts/:id', (req, res, next) => {
@@ -127,15 +122,25 @@ router.delete('/blog-posts/:id', (req, res, next) => {
 		return next();
 	}
 
-	if (BlogPosts.delete(id)) {
-		res.status(204).send();
-	} else {
-		res.status(404).json({
-			message: `Unable to delete post with id: ${id}, it eighter never existed or has already been deleted. In other words 404 post with id: ${id} not found.`,
-			status: 404
+	BlogPosts.delete(id)
+		.then(deleted => {
+			if (deleted) {
+				res.status(204).send();
+			} else {
+				res.status(404).json({
+					message: `Unable to delete post with id: ${id}, it eighter never existed or has already been deleted. In other words 404 post with id: ${id} not found.`,
+					status: 404
+				});
+				return next();
+			}
+		})
+		.catch(err => {
+			res.status(404).json({
+				message: `Unable to delete post with id: ${id}, it eighter never existed or has already been deleted. In other words 404 post with id: ${id} not found.`,
+				status: 404
+			});
+			return next();
 		});
-	}
-	return next();
 });
 
 router.put('/blog-posts/:id', (req, res, next) => {
@@ -145,39 +150,40 @@ router.put('/blog-posts/:id', (req, res, next) => {
 		res.status(406).json({
 			message: "Missing id param.",
 			status: 406
-		}).send("Finish");
+		});
+		return next();
 	}
 
 	let posibleFields = ['title', 'content', 'author', 'publishDate'];
-	let hasValidField = false
-	posibleFields.forEach(field => {
-		if (field in req.body) {
-			hasValidField = true
+	Object.keys(req.body).forEach(function(key) {
+		if (!posibleFields.includes(key)) {
+			delete req.body[key];
 		}
 	});
 
-	if (hasValidField) {
-		let updatedPost = BlogPosts.update(id, req.body);
-		if (updatedPost) {
+	if (req.body == {}) {
+		res.status(404).json({
+			message: `Unable to update post with id: ${id}, no valid fields sent. This should probably be a 406 error instead but the instructions said 404.`,
+			status: 404
+		});
+		return next();
+	}
+
+	BlogPosts.update(id, req.body).
+		then(updatedPost => {
 			res.status(200).json({
 				message: `Successfully updated post with id: ${id}.`,
 				status: 200,
 				post: updatedPost
 			});
-		} else {
+		})
+		.catch(err => {
 			res.status(404).json({
 				message: `Post with id: ${id} not found.`,
 				status: 404
 			});
-		}
-		return next();
-	}
-
-	res.status(404).json({
-		message: `Unable to update post with id: ${id}, no valid fields sent. This should probably be a 406 error instead but the instructions said 404.`,
-		status: 404
-	});
-	return next();
+			return next();
+		});
 });
 
 module.exports = router;

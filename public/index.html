@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" type="text/css" href="./main.css">
+    <title>This is the index</title>
+  </head>
+  <body>
+    <h1>All blog posts</h1>
+    <div class="posts-list posts">
+    </div>
+
+    <form class="makePostForm">
+      <fieldset>
+        <legend> Add new blog post </legend>
+        <label>
+          <div>
+            Title: <input class="postTitle" type="text"/>
+          </div>
+        </label>
+        <label>
+          <div>
+            Content : <input class="postContent" type="text"/>
+          </div>
+        </label>
+        <label>
+          <div>
+            Author : <input class="postAuthor" type="text"/>
+          </div>
+        </label>
+        <label>
+          <div>
+            Publish date: <input class="postDate" type="date"/>
+          </div>
+        </label>
+        <button class="submitPost" type="submit">Add</button>
+      </fieldset>
+    </form>
+
+    <h1>Blog posts of author</h1>
+    <div class="author-posts-list posts">
+    </div>
+
+    <form class="postsOfAuthorForm">
+      <fieldset>
+        <legend> Get posts of a specific author </legend>
+        <label>
+          <div>
+            Author: <input class="authorOfPosts" type="text"/>
+          </div>
+        </label>
+        <button class="submitAuthor" type="submit">Retrieve</button>
+      </fieldset>
+    </form>
+
+    <form class="updatePostForm">
+      <fieldset>
+        <legend> Modify an existing post </legend>
+        <label>
+          <div>
+            Id: <input class="updatePostId" type="text"/>
+          </div>
+        </label>
+        <label>
+          <div>
+            Title: <input class="updatePostTitle" type="text"/>
+          </div>
+        </label>
+        <label>
+          <div>
+            Content : <input class="updatePostContent" type="text"/>
+          </div>
+        </label>
+        <label>
+          <div>
+            Author : <input class="updatePostAuthor" type="text"/>
+          </div>
+        </label>
+        <label>
+          <div>
+            Publish date: <input class="updatePostDate" type="date"/>
+          </div>
+        </label>
+        <button class="submitUpdatePost" type="submit">Update</button>
+      </fieldset>
+    </form>
+
+    <script
+    src="https://code.jquery.com/jquery-3.3.1.js"
+    integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+    crossorigin="anonymous"></script>
+    <script src="./script.js"> </script>
+  </body>
+</html>

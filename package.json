@@ -19,6 +19,7 @@
   "homepage": "https://github.com/SerLizar/blog-post#readme",
   "dependencies": {
     "express": "^4.16.4",
+    "mongoose": "^5.5.5",
     "uuid": "^3.3.2"
   }
 }

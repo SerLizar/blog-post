@@ -1,71 +1,50 @@
+const mongoose = require('mongoose');
 const uuid = require('uuid');
 
-let blogDB = [
-	{
-		id: uuid.v4(),
-		title: "Hello World",
-		content: "It works!",
-		author: "SerLizar",
-		publishDate: new Date(2019, 2, 20)
-	},
-	{
-		id: uuid.v4(),
-		title: "Posting is fun",
-		content: "You should try it out",
-		author: "SerLizar",
-		publishDate: new Date(2019, 2, 21)
-	},
-	{
-		id: uuid.v4(),
-		title: "New Guy",
-		content: "I'm the new guy here, pleased to meet you",
-		author: "Roy",
-		publishDate: new Date(2019, 2, 23)
-	}
-];
+mongoose.Promise = global.Promise;
+
+let blogPostSchema = mongoose.Schema({
+	_id: {type: String, default: uuid.v4},
+	title: {type: String, required: true},
+	content: {type: String, required: true},
+	author: {type: String, required: true},
+	publishDate:{type: Date, default: Date.now}
+});
+
+let Posts = mongoose.model('Posts', blogPostSchema)
 
 const BlogPosts = {
-	get: _ => {return blogDB;},
+	get: criteria => {
+		return Posts.find(criteria)
+			.then(posts => {return posts;})
+			.catch(err => {throw new Error(err);});
+	},
 	post: (postTitle, postContent, postAuthor, postDate) => {
 		let post = {
-			id: uuid.v4(),
 			title: postTitle,
 			content: postContent,
 			author: postAuthor,
 			publishDate: postDate
 		};
-
-		blogDB.push(post);
-		return post;
+		return Posts.create(post)
+			.then(newPost => {return newPost})
+			.catch(err => {throw new Error(err);});
 	},
 	update: (id, params) => {
-		let posibleFields = ['title', 'content', 'author', 'publishDate'];
-		let postIndex;
-		blogDB.forEach((post, index) => {
-			if (post.id == id) {
-				posibleFields.forEach(field => {
-					if (field in params) {
-						if (field == 'publishDate') {
-							params[field] = new Date(params[field]);
-						}
-						post[field] = params[field];
-					}
-				});
-				postIndex = index;
-			}
-		});
-
-		return blogDB[postIndex];
+		return Posts.findByIdAndUpdate(id, params)
+			.then(updatedPost => {return Posts.findById(id)})
+			.catch(err => {throw new Error(err);});
 	},
 	delete: id => {
-		deleted = false;
-		blogDB.forEach((post, index) => {
-			if (post.id == id) {
-				blogDB.splice(index, 1);
-				deleted = true;
-			}
-		});
-		return deleted;
+		return Posts.findByIdAndDelete(id)
+			.then(post => {
+				if (post) {
+					return true;
+				} else {
+					return false;
+				}
+			})
+			.catch(err => {throw new Error(err);});
 	}
 };
 
